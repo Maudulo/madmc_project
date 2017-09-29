@@ -58,7 +58,7 @@ def naive_pareto_dominants_2(l):
 			for j in range(i, len(new_l)):
 				if is_pareto_dominant(new_l[0], new_l[j]):
 					to_delete.append(new_l[j])
-				if is_pareto_dominant(new_l[j], new_l[0]):
+				elif is_pareto_dominant(new_l[j], new_l[0]):
 					pareto_dominant = false
 					break
 
@@ -67,7 +67,7 @@ def naive_pareto_dominants_2(l):
 
 		to_delete.append(0)
 
-		if len(to_delete) >= len(new_l)-1:
+		if len(to_delete) == len(new_l):
 			go_on = false
 
 		new_l = [i for j, i in enumerate(new_l) if j not in to_delete]
