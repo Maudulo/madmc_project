@@ -42,3 +42,8 @@ def plot_pareto_functions(func, nmin = 200, nmax = 10000, step = 200, n = 50):
 	x = test_pareto_functions(func, nmin, nmax, step, n)
 	plt.plot(x, y)
 
+def plot_pareto_compare_functions(func1, func2, nmin = 200, nmax = 10000, step = 200, n = 50)
+	plot_pareto_functions(func1, nmin = 200, nmax = 10000, step = 200, n = 50)
+	plot_pareto_functions(func2, nmin = 200, nmax = 10000, step = 200, n = 50)
+	plt.show()
+	
