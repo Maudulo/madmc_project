@@ -41,8 +41,8 @@ def plot_pareto_functions(func, nmin = 200, nmax = 10000, step = 200, n = 50):
 			  step : the number of value added to the list between 2 iterations
 			  n : the number of tests during an iteration
 	"""
-	y = np.arange(nmin, nmax, step);
-	x = test_pareto_functions(func, nmin, nmax, step, n)
+	x = np.arange(nmin, nmax, step);
+	y = test_pareto_functions(func, nmin, nmax, step, n)
 	plt.plot(x, y)
 
 def plot_pareto_compare_functions(func1, func2, nmin = 200, nmax = 10000, step = 200, n = 50):
