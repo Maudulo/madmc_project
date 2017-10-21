@@ -1,4 +1,5 @@
 import numpy as np 
+from operator import itemgetter
 
 def gaussian_vector_generator(n, m):
 	"""
@@ -17,26 +18,26 @@ def naive_pareto_dominants(l):
 	"""
 	pareto_dominants = []
 	for i in range(len(l)):
-		pareto_dominant = true
+		pareto_dominant = True
 		for j in range(len(pareto_dominants)):
-			if np.all(pareto_dominants[j] >= l[i]) and np.any(pareto_dominants[j] > l[i]):
-				pareto_dominant = false
+			if np.all(pareto_dominants[j] <= l[i]) and np.any(pareto_dominants[j] < l[i]):
+				pareto_dominant = False
 				break
 
 		if pareto_dominant:
 			for j in range(i, len(l)):
-				if np.all(l[j] >= l[i]) and np.any(l[j] > l[i]):
-					pareto_dominant = false
+				if np.all(l[j] <= l[i]) and np.any(l[j] < l[i]):
+					pareto_dominant = False
 					break
 
 		if pareto_dominant:
-			pareto_dominants.append(i)
+			pareto_dominants.append(l[i])
 
 	return pareto_dominants
 
 
 def is_pareto_dominant(a,b):
-	return np.all(a >= b) and np.any(a > b)
+	return np.all(a <= b) and np.any(a < b)
 
 def naive_pareto_dominants_2(l):
 	"""
@@ -47,11 +48,11 @@ def naive_pareto_dominants_2(l):
 	go_on = True
 	to_delete=[]
 	while(go_on):
-		pareto_dominant = true
+		pareto_dominant = True
 
 		for j in range(len(pareto_dominants)):
 			if is_pareto_dominant(pareto_dominants[j], new_l[0]):
-				pareto_dominant = false
+				pareto_dominant = False
 				break
 
 		if pareto_dominant:
@@ -59,7 +60,7 @@ def naive_pareto_dominants_2(l):
 				if is_pareto_dominant(new_l[0], new_l[j]):
 					to_delete.append(new_l[j])
 				elif is_pareto_dominant(new_l[j], new_l[0]):
-					pareto_dominant = false
+					pareto_dominant = False
 					break
 
 		if pareto_dominant:
@@ -81,11 +82,11 @@ def pareto_dominants(l):
 	O(nlog(n))
 	"""
 
-	l_sorted = sorted(l, key=itemgetter(0,1), reverse=True)
+	l_sorted = sorted(l, key=itemgetter(0,1), reverse=False)
 	v_2_max = l_sorted[0]
 	pareto_dominants = [l_sorted[0]]
 	for i in range(1,len(l_sorted)):
-		if l_sorted[i][1] > v_2_max[1]:
+		if l_sorted[i][1] < v_2_max[1]:
 			v_2_max = l_sorted[i]
 			pareto_dominants.append(l_sorted[i])
 
