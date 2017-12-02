@@ -81,7 +81,7 @@ def pareto_dominants(l):
 	by sorting l in a lexicographic order then 
 	O(nlog(n))
 	"""
-
+	print(l)
 	l_sorted = sorted(l, key=itemgetter(0,1), reverse=False)
 	v_2_max = l_sorted[0]
 	pareto_dominants = [l_sorted[0]]
@@ -91,3 +91,43 @@ def pareto_dominants(l):
 			pareto_dominants.append(l_sorted[i])
 
 	return pareto_dominants
+
+
+
+
+def dynamic_programming(list_obj, size_max):
+	"""
+		@params list_obj la liste des objets dont on veut trouver un sous ensemble
+				size_max la taille du sous ensemble d'objets souhaité
+		@return la liste des paretos dominants
+
+		Cette fonction trouve l'ensemble des paretos optimaux par la programmation dymnamique
+
+		Les fonctions de récurrence sont : 
+		dp_list[0,0] = list_obj[0]
+		dp_list[1,l] = p_l U dp_list[1,l-1]
+		dp_list[k,l] = Pareto((dp_list[k-1, l-1] + p_l) U dp_list[k, l-1])
+
+	"""
+
+	dp_list = np.empty((len(list_obj), size_max), dtype = object)
+	dp_list[0][0] = list_obj[0]
+	print(dp_list)
+
+	# pour chaque objet de la liste
+	for l in range(1, len(list_obj)):
+
+		dp_list[l][0] = pareto_dominants(np.concatenate(np.array(list_obj[l]), np.array(dp_list[l - 1][0])))
+		
+		# pour chaque taille d'objet
+		for k in range(1, l+1):
+			print(l, ",",k)
+			list_obj = np.add(dp_list[l - 1][k - 1], list_obj[l])
+
+			if k != l: # si k == l, alors k>l-1 et la case du dessus n'est pas remplie
+				list_obj = np.concatenate(list_obj, dp_list[l - 1][k])
+			print(list_obj)
+			dp_list[l][k] = pareto_dominants(np.array([list_obj]))
+		print(dp_list)
+
+	return pareto_dominants(dp_list[list_obj-1][size_max-1])
