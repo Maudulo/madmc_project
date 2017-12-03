@@ -135,3 +135,22 @@ def dynamic_programming(list_obj, size_max):
 			dp_list[l][k] = pareto_dominants(np.array(objs))
 
 	return pareto_dominants(dp_list[len(list_obj)-1][size_max-1])
+
+def minimax_value(l, alpha_min, alpha_max):
+	"""
+		@params l la liste des paretos-dominants
+		Détermine la valeur minimax de chacun des points de l, et retourne leur valeur minimax
+	"""
+	alpha = alpha_min
+	results = []
+
+	for element in l:
+		if(element[0] > element[1]):
+			alpha = alpha_max
+		results.append(element[0] * alpha + element[1] * (1 - alpha))
+
+	return results
+
+def minimax_dynamic_programming(l, k, alpha_min = 0, alpha_max = 1):
+	pareto = dynamic_programming(l, k)
+	return pareto[np.argmax(minimax_value(pareto, alpha_min, alpha_max))]

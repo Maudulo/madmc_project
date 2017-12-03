@@ -18,3 +18,7 @@ l = gaussian_vector_generator(3, 10)
 k = 2
 print("\nliste : \n", l)
 print("\n\np opt de taille ", k, "\n ", dynamic_programming(l, k))
+
+alpha_min = 0.1
+alpha_max = 0.2
+print("meilleur minimax avec alpha_min = ", alpha_min, " alpha_max = ", alpha_max, "\n", minimax_dynamic_programming(l, k, alpha_min = 0, alpha_max = 1))
