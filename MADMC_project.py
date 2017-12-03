@@ -1,6 +1,8 @@
 import numpy as np 
 from operator import itemgetter
 
+import sys
+
 def gaussian_vector_generator(n, m):
 	"""
 	generates n random vectors with a gaussian distribution with 
@@ -81,7 +83,6 @@ def pareto_dominants(l):
 	by sorting l in a lexicographic order then 
 	O(nlog(n))
 	"""
-	print(l)
 	l_sorted = sorted(l, key=itemgetter(0,1), reverse=False)
 	v_2_max = l_sorted[0]
 	pareto_dominants = [l_sorted[0]]
@@ -109,25 +110,28 @@ def dynamic_programming(list_obj, size_max):
 		dp_list[k,l] = Pareto((dp_list[k-1, l-1] + p_l) U dp_list[k, l-1])
 
 	"""
-
+	if(size_max > len(list_obj)):
+		print("Il ne peut pas y avoir de solution avec ", size_max, " élements dans un ensemble de ", len(list_obj), " éléments")
+		sys.exit()
 	dp_list = np.empty((len(list_obj), size_max), dtype = object)
-	dp_list[0][0] = list_obj[0]
-	print(dp_list)
+	dp_list[0][0] = np.array([list_obj[0]])
 
 	# pour chaque objet de la liste
 	for l in range(1, len(list_obj)):
 
-		dp_list[l][0] = pareto_dominants(np.concatenate(np.array(list_obj[l]), np.array(dp_list[l - 1][0])))
+		dp_list[l][0] = pareto_dominants(np.concatenate((np.array([list_obj[l]]), dp_list[l - 1][0])))
 		
 		# pour chaque taille d'objet
-		for k in range(1, l+1):
-			print(l, ",",k)
-			list_obj = np.add(dp_list[l - 1][k - 1], list_obj[l])
+		for k in range(1, size_max):
+
+			if k == l + 1:
+				break
+
+			objs = np.add(dp_list[l - 1][k - 1], list_obj[l])
 
 			if k != l: # si k == l, alors k>l-1 et la case du dessus n'est pas remplie
-				list_obj = np.concatenate(list_obj, dp_list[l - 1][k])
-			print(list_obj)
-			dp_list[l][k] = pareto_dominants(np.array([list_obj]))
-		print(dp_list)
+				objs = np.concatenate((objs, dp_list[l - 1][k]))
 
-	return pareto_dominants(dp_list[list_obj-1][size_max-1])
+			dp_list[l][k] = pareto_dominants(np.array(objs))
+
+	return pareto_dominants(dp_list[len(list_obj)-1][size_max-1])

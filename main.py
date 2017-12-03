@@ -14,7 +14,7 @@ from MADMC_project import *
 
 # plot_pareto_compare_functions(naive_pareto_dominants, pareto_dominants, nmin = 20, nmax = 500, step = 25, n = 50)
 
-l = gaussian_vector_generator(5, 10)
+l = gaussian_vector_generator(3, 10)
 k = 2
-print("liste : ", l)
-print("p opt de taille k = ", k, " ", dynamic_programming(l, k))
+print("\nliste : \n", l)
+print("\n\np opt de taille ", k, "\n ", dynamic_programming(l, k))
