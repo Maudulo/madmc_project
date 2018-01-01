@@ -17,7 +17,9 @@ from MADMC_project import *
 l = gaussian_vector_generator(3, 10)
 k = 2
 print("\nliste : \n", l)
-print("\n\np opt de taille ", k, "\n ", dynamic_programming(l, k))
+dp = dynamic_programming(l, k)
+print("\n\np opt de taille ", k, "\n ", dp[0])
+print("somme composée de ", dp[1])
 
 alpha_min = 0.1
 alpha_max = 0.2
