@@ -16,15 +16,15 @@ from MADMC_project import *
 
 # plot_pareto_compare_functions(naive_pareto_dominants, pareto_dominants, nmin = 20, nmax = 500, step = 25, n = 50)
 
-l = gaussian_vector_generator(3, 10)
-k = 2
-print("\nliste : \n", l)
-dp = dynamic_programming(l, k)
-print("\n\np opt de taille ", k, "\n ", dp[0])
-print("somme composée de ", dp[1])
+# l = gaussian_vector_generator(3, 10)
+# k = 2
+# print("\nliste : \n", l)
+# dp = dynamic_programming(l, k)
+# print("\n\np opt de taille ", k, "\n ", dp[0])
+# print("somme composée de ", dp[1])
 
 # alpha_min = 0.1
 # alpha_max = 0.2
 # print("meilleur minimax avec alpha_min = ", alpha_min, " alpha_max = ", alpha_max, "\n", minimax_dynamic_programming(l, k, alpha_min = 0, alpha_max = 1))
 
-# test_all_pareto_functions([pareto_dominants])
+test_all_pareto_functions([naive_pareto_dominants, pareto_dominants])

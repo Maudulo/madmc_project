@@ -50,7 +50,7 @@ def plot_pareto_compare_functions(func1, func2, nmin = 200, nmax = 10000, step =
 	plot_pareto_functions(func2, nmin = nmin, nmax = nmax, step = step, m = m, n = n)
 	plt.show()
 	
-def test_all_pareto_functions(func_list, nmin = 200, nmax = 12000, step = 200, m = 1000, n = 50):
+def test_all_pareto_functions(func_list, nmin = 200, nmax = 10000, step = 200, m = 1000, n = 100):
 	"""
 	This function displays a graph representing the time depending of the number of value into a list
 	@params : func_list : a list of functions to test
@@ -80,8 +80,15 @@ def test_all_pareto_functions(func_list, nmin = 200, nmax = 12000, step = 200, m
 		index_time_measure += 1
 	print("-------------------------------------")
 	
+	fig, ax = plt.subplots()
 	for f in range(func_nb):
 		x = np.arange(nmin, nmax, step);
 		y = time_measure[f]
-		plt.plot(x, y, label=func_list[f].__name__)
+		ax.plot(x, y, label=func_list[f].__name__)
+	ax.set_ylabel("Temps (ms)")
+	ax.set_xlabel("Nombre de vecteurs")
+	ax.margins(y=.1, x=.1)
+	legend = ax.legend(loc='upper center', shadow=True)
+	frame = legend.get_frame()
+	frame.set_facecolor('0.90')
 	plt.show()
