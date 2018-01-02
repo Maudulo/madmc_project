@@ -116,7 +116,7 @@ def construct_arg_list(l, arg_list):
 	return list_pareto
 
 
-def dynamic_programming(list_obj, size_max):
+def dynamic_programming(list_obj, size_max, i_dominant = False, alpha_min = 0, alpha_max = 1):
 	"""
 		@params list_obj la liste des objets dont on veut trouver un sous ensemble
 				size_max la taille du sous ensemble d'objets souhaité
@@ -143,8 +143,10 @@ def dynamic_programming(list_obj, size_max):
 
 	# pour chaque objet de la liste
 	for l in range(1, len(list_obj)):
-
-		dp_list[l][0], index_p_opt = arg_pareto_dominants(np.concatenate((np.array([list_obj[l]]), dp_list[l - 1][0])))
+		if not I_dominant:
+			dp_list[l][0], index_p_opt = arg_pareto_dominants(np.concatenate((np.array([list_obj[l]]), dp_list[l - 1][0])))
+		else:
+			dp_list[l][k] = I_dominant(np.concatenate((np.array([list_obj[l]]), dp_list[l - 1][0])), alpha_min, alpha_max)
 
 		temp_list = []
 		for i in index_p_opt:
@@ -163,7 +165,10 @@ def dynamic_programming(list_obj, size_max):
 			if k != l: # si k == l, alors k>l-1 et la case du dessus n'est pas remplie
 				objs = np.concatenate((objs, dp_list[l - 1][k]))
 
-			dp_list[l][k], index_p_opt = arg_pareto_dominants(np.array(objs))
+			if not I_dominant:
+				dp_list[l][k], index_p_opt = arg_pareto_dominants(np.array(objs))
+			else:
+				dp_list[l][k] = I_dominant(np.array(objs), alpha_min, alpha_max)
 
 			list_bidon = np.array([])
 
@@ -210,3 +215,42 @@ def minimax_value(l, alpha_min, alpha_max):
 def minimax_dynamic_programming(l, k, alpha_min = 0, alpha_max = 1):
 	pareto, list_element = dynamic_programming(l, k)
 	return pareto[np.argmax(minimax_value(pareto, alpha_min, alpha_max))], list_element[np.argmax(minimax_value(pareto, alpha_min, alpha_max))]
+
+def I_dominant(l, alpha_min, alpha_max):
+
+	I_dominator = []
+	I_dominated = []
+	continuer = False
+	new_l = copy.deepcopy(l)
+
+	while(len(new_l) != 0):
+		element = l[0]
+		i_dominant = True
+
+		# pour tous les autres éléments
+		for i in range(len(1, l)):
+			element2 = l[i]
+
+			if dominate(element, element2, alpha_min, alpha_max):
+				I_dominated.append(element2)
+
+			elif dominate(element2, element, alpha_min, alpha_max):
+				i_dominant = False
+				I_dominated.append(element)
+				break
+
+		if(i_dominant):
+			I_dominator.append(element)
+
+		new_l = [i for (j, i) in enumerate(new_l) if (j not in I_dominator and not in I_dominated)]
+
+	return I_dominator
+
+
+
+
+def fi(element, alpha):
+	return element[0] * alpha + element[1] * (1 - alpha)
+
+def dominate(e1, e2, alpha_min, alpha_max):
+	return fi(e1, alpha_min) <= fi(e2, alpha_min) and fi(e1, alpha_max) <= fi(e2, alpha_max) and (fi(e1, alpha_min) < fi(e2, alpha_min) or fi(e1, alpha_max) < fi(e2, alpha_max))
