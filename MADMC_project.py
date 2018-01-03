@@ -1,5 +1,5 @@
 import numpy as np 
-from operator import itemgetter
+from operator import itemgetter, attrgetter
 
 import sys
 
@@ -93,6 +93,23 @@ def pareto_dominants(l):
 
 	return pareto_dominants
 
+def pareto_dominants_2(l):
+	"""
+	find all vectors that are not pareto dominated in l
+	by sorting l in a lexicographic order then 
+	O(nlog(n))
+	"""
+	# l_sorted = sorted(l, key=attrgetter('sum'), reverse=False)
+	l_sorted = sorted(l, key=lambda elem: (elem.sum[0], elem.sum[1]), reverse=False)
+	v_2_max = l_sorted[0]
+	pareto_dominants = [l_sorted[0]]
+	for i in range(1,len(l_sorted)):
+		if l_sorted[i].sum[1] < v_2_max.sum[1]:
+			v_2_max = l_sorted[i]
+			pareto_dominants.append(l_sorted[i])
+
+	return pareto_dominants
+
 
 def arg_pareto_dominants(l):
 	"""
@@ -101,12 +118,15 @@ def arg_pareto_dominants(l):
 			arg_list la liste des indices des Pareto-dominants dans l
 	"""
 	p_dominants = pareto_dominants(l)
-	arg_list = []
-	for x in p_dominants:
-		for y in range(len(l)):
-			if x[0] == l[y][0] and x[1] == l[y][1]:
-				arg_list.append(y)
-	return p_dominants, arg_list
+	# arg_list = []
+	# for x in p_dominants:
+	# 	for y in range(len(l)):
+	# 		if x[0] == l[y][0] and x[1] == l[y][1]:
+	# 			arg_list.append(y)
+	# return p_dominants, arg_list
+
+	return p_dominants, [l.index(x) for x in p_dominants]
+
 
 
 def construct_arg_list(l, arg_list):
@@ -116,81 +136,43 @@ def construct_arg_list(l, arg_list):
 	return list_pareto
 
 
-def dynamic_programming(list_obj, size_max):
-	"""
-		@params list_obj la liste des objets dont on veut trouver un sous ensemble
-				size_max la taille du sous ensemble d'objets souhaité
-		@return la liste des paretos dominants
 
-		Cette fonction trouve l'ensemble des paretos optimaux par la programmation dymnamique
-
-		Les fonctions de récurrence sont : 
-		dp_list[0,0] = list_obj[0]
-		dp_list[1,l] = Pareto(p_l U dp_list[1,l-1])
-		dp_list[k,l] = Pareto((dp_list[k-1, l-1] + p_l) U dp_list[k, l-1])
-
-	"""
-	if(size_max > len(list_obj)):
-		print("Il ne peut pas y avoir de solution avec ", size_max, " élements dans un ensemble de ", len(list_obj), " éléments")
+def dynamic_programming_2(L, K, I_dominance = False):
+	if(K > len(L)):
+		print("Il ne peut pas y avoir de solution avec ", K, " élements dans un ensemble de ", len(L), " éléments")
 		sys.exit()
 
-	dp_list = np.empty((len(list_obj), size_max), dtype = object) # liste des P-opt (somme des objets)
-	dp_obj = np.empty((len(list_obj), size_max), dtype = object) # liste des objets composant les P-opt
+	get_Dominators  = pareto_dominants_2
+	if I_dominance:
+		get_Dominators = I_dominator_2
 
-	dp_list[0][0] = np.array([list_obj[0]])
-	dp_obj[0][0] = dp_list[0][0]
-	print("initialisation : ", dp_obj[0][0])
 
-	# pour chaque objet de la liste
-	for l in range(1, len(list_obj)):
+	tab = np.empty((len(L), K), dtype = object)
 
-		dp_list[l][0], index_p_opt = arg_pareto_dominants(np.concatenate((np.array([list_obj[l]]), dp_list[l - 1][0])))
+	#_______________________________________________
+	#initialisation
+	tab[0,0] = [Element(L[0],[L[0]])]
 
-		temp_list = []
-		for i in index_p_opt:
-			temp_list.append(list_obj[i])
-		dp_obj[l][0] = temp_list
-		print("étape suivante : ", dp_obj[l][0])
-		
-		# pour chaque taille d'objet
-		for k in range(1, size_max):
+	for l in range(1,len(L)):
+		tab[l,0] = get_Dominators(np.concatenate((tab[l-1,0], [Element(L[l],[L[l]])])))
 
+	for l in range(1, len(L)):
+		for k in range(1, K):
 			if k == l + 1:
 				break
-
-			objs = np.add(dp_list[l - 1][k - 1], list_obj[l])
-
+			objs = tab[l-1,k-1]
+			for o in objs:
+				o.sum = np.add(o.sum, L[l])
+				o.elements = np.concatenate((o.elements,[L[l]]))
 			if k != l: # si k == l, alors k>l-1 et la case du dessus n'est pas remplie
-				objs = np.concatenate((objs, dp_list[l - 1][k]))
+				objs = np.concatenate((objs, tab[l-1,k]))
 
-			dp_list[l][k], index_p_opt = arg_pareto_dominants(np.array(objs))
+			tab[l,k] = get_Dominators(objs)
 
-			list_bidon = np.array([])
-
-			print(type(np.array(dp_obj[l - 1][k - 1])))
-			print(type(np.array([list_obj[l]])))
-
-			print(np.array(dp_obj[l - 1][k - 1]))
-			print(np.array([list_obj[l]]))
-
-			print("somme : ", np.concatenate((np.array(dp_obj[l - 1][k - 1]), np.array([list_obj[l]])), axis = 0))
+	# return (tab[len(L)-1,K-1].sum, tab[len(L)-1,K-1].elements)
+	return tab[len(L)-1,K-1]
 
 
-			print(type(np.add(dp_obj[l - 1][k - 1], list_obj[l])))
-			print(type(dp_obj[l - 1][k]))
-			list_bidon = np.concatenate(np.add(dp_obj[l - 1][k - 1], list_obj[l]), dp_obj[l - 1][k])
-			print(list_bidon, "\n")
-
-
-
-
-			temp_list = []
-			for i in index_p_opt:
-				temp_list.append(list_bidon[i])
-			dp_obj[l][k] = temp_list
-			print(dp_obj[l][k])
-
-	return dp_list[len(list_obj)-1][size_max-1], dp_obj[len(list_obj)-1][size_max-1]
 
 def minimax_value(l, alpha_min, alpha_max):
 	"""
@@ -209,4 +191,12 @@ def minimax_value(l, alpha_min, alpha_max):
 
 def minimax_dynamic_programming(l, k, alpha_min = 0, alpha_max = 1):
 	pareto, list_element = dynamic_programming(l, k)
-	return pareto[np.argmax(minimax_value(pareto, alpha_min, alpha_max))], list_element[np.argmax(minimax_value(pareto, alpha_min, alpha_max))]
+	return pareto[np.argmin(minimax_value(pareto, alpha_min, alpha_max))], list_element[np.argmax(minimax_value(pareto, alpha_min, alpha_max))]
+
+
+class Element:
+
+	def __init__(self, sum = 0, element = []):
+		self.sum = sum
+		self.elements = element
+
