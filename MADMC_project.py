@@ -1,6 +1,6 @@
 import numpy as np 
 from operator import itemgetter, attrgetter
-
+import copy
 import sys
 
 def gaussian_vector_generator(n, m):
@@ -143,7 +143,7 @@ def dynamic_programming_2(L, K, I_dominance = False):
 	
 	get_Dominators  = pareto_dominants_2
 	if I_dominance:
-		get_Dominators = I_dominator_2
+		get_Dominators = I_dominant_2
 
 	tab = np.empty((len(L), K), dtype = object)
 
@@ -152,18 +152,18 @@ def dynamic_programming_2(L, K, I_dominance = False):
 	tab[0,0] = [Element(L[0],[L[0]])]
 
 	for l in range(1,len(L)):
-		tab[l,0] = get_Dominators(np.concatenate((tab[l-1,0], [Element(L[l],[L[l]])])))
+		tab[l,0] = get_Dominators(np.concatenate((copy.deepcopy(tab[l-1,0]), [Element(L[l],[L[l]])])))
 
 	for l in range(1, len(L)):
 		for k in range(1, K):
 			if k == l + 1:
 				break
-			objs = tab[l-1,k-1]
+			objs = copy.deepcopy(tab[l-1,k-1])
 			for o in objs:
 				o.sum = np.add(o.sum, L[l])
 				o.elements = np.concatenate((o.elements,[L[l]]))
 			if k != l: # si k == l, alors k>l-1 et la case du dessus n'est pas remplie
-				objs = np.concatenate((objs, tab[l-1,k]))
+				objs = np.concatenate((objs, copy.deepcopy(tab[l-1,k])))
 			tab[l,k] = get_Dominators(objs)
 
 	# return (tab[len(L)-1,K-1].sum, tab[len(L)-1,K-1].elements)
@@ -238,7 +238,7 @@ def minimax_dynamic_programming(l, k, alpha_min = 0, alpha_max = 1):
 	return pareto[np.argmin(minimax_value(pareto, alpha_min, alpha_max))], list_element[np.argmax(minimax_value(pareto, alpha_min, alpha_max))]
 
 
-def I_dominant(l, alpha_min, alpha_max):
+def I_dominant(l, alpha_min = 0, alpha_max = 1):
 
     I_dominator = []
     to_delete = []
@@ -249,7 +249,7 @@ def I_dominant(l, alpha_min, alpha_max):
         i_dominant = True
 
         # pour tous les autres éléments
-        for i in range(len(1, l)):
+        for i in range(1,len(l)):
             element2 = l[i]
 
             if dominate(element, element2, alpha_min, alpha_max):
@@ -261,6 +261,35 @@ def I_dominant(l, alpha_min, alpha_max):
 
         if(i_dominant):
             I_dominator.append(element)
+        to_delete.append(0)
+
+        new_l = [i for (j, i) in enumerate(new_l) if (j not in to_delete)]
+
+    return I_dominator
+
+def I_dominant_2(l, alpha_min = 0, alpha_max = 1):
+
+    I_dominator = []
+    to_delete = []
+    new_l = copy.deepcopy(l)
+
+    while(len(new_l) != 0):
+        element = l[0]
+        i_dominant = True
+
+        # pour tous les autres éléments
+        for i in range(1,len(l)):
+            element2 = l[i]
+
+            if dominate(element.sum, element2.sum, alpha_min, alpha_max):
+                to_delete.append(i)
+
+            elif dominate(element2.sum, element.sum, alpha_min, alpha_max):
+                i_dominant = False
+                break
+
+        if(i_dominant):
+            I_dominator.append(copy.deepcopy(element))
         to_delete.append(0)
 
         new_l = [i for (j, i) in enumerate(new_l) if (j not in to_delete)]
@@ -279,6 +308,6 @@ def dominate(e1, e2, alpha_min, alpha_max):
 
 class Element:
 
-	def __init__(self, sum = 0, element = []):
-		self.sum = sum
+	def __init__(self, sum_vector = 0, element = []):
+		self.sum = sum_vector
 		self.elements = element
