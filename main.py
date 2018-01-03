@@ -6,11 +6,13 @@ from MADMC_project import *
 # vector_generated = gaussian_vector_generator(10, 50)
 
 # print("valeurs générées : ", vector_generated)
-# l = naive_pareto_dominants(vector_generated)
-# print("p-dominants fonction 1 : ", l)
-# l = naive_pareto_dominants_2(vector_generated)
-# print("p-dominants fonction 1.2 : ", l)
+# # l = naive_pareto_dominants(vector_generated)
+# # print("p-dominants fonction 1 : ", l)
+# # l = naive_pareto_dominants_2(vector_generated)
+# # print("p-dominants fonction 1.2 : ", l)
 # l2 = pareto_dominants(vector_generated)
+# print("p-dominants fonction 2 : ", l2)
+# l2 = pareto_dominants_2(vector_generated)
 # print("p-dominants fonction 2 : ", l2)
 
 

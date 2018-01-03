@@ -136,16 +136,14 @@ def construct_arg_list(l, arg_list):
 	return list_pareto
 
 
-
 def dynamic_programming_2(L, K, I_dominance = False):
 	if(K > len(L)):
 		print("Il ne peut pas y avoir de solution avec ", K, " élements dans un ensemble de ", len(L), " éléments")
 		sys.exit()
-
+	
 	get_Dominators  = pareto_dominants_2
 	if I_dominance:
 		get_Dominators = I_dominator_2
-
 
 	tab = np.empty((len(L), K), dtype = object)
 
@@ -166,12 +164,58 @@ def dynamic_programming_2(L, K, I_dominance = False):
 				o.elements = np.concatenate((o.elements,[L[l]]))
 			if k != l: # si k == l, alors k>l-1 et la case du dessus n'est pas remplie
 				objs = np.concatenate((objs, tab[l-1,k]))
-
 			tab[l,k] = get_Dominators(objs)
 
 	# return (tab[len(L)-1,K-1].sum, tab[len(L)-1,K-1].elements)
 	return tab[len(L)-1,K-1]
 
+
+def dynamic_programming(list_obj, size_max, i_dominant = False, alpha_min = 0, alpha_max = 1):
+    """
+        @params list_obj la liste des objets dont on veut trouver un sous ensemble
+                size_max la taille du sous ensemble d'objets souhaité
+        @return la liste des paretos dominants
+
+        Cette fonction trouve l'ensemble des paretos optimaux par la programmation dymnamique
+
+        Les fonctions de récurrence sont : 
+        dp_list[0,0] = list_obj[0]
+        dp_list[1,l] = Pareto(p_l U dp_list[1,l-1])
+        dp_list[k,l] = Pareto((dp_list[k-1, l-1] + p_l) U dp_list[k, l-1])
+
+    """
+    if(size_max > len(list_obj)):
+        print("Il ne peut pas y avoir de solution avec ", size_max, " élements dans un ensemble de ", len(list_obj), " éléments")
+        sys.exit()
+
+    dp_list = np.empty((len(list_obj), size_max), dtype = object) # liste des P-opt (somme des objets)
+
+    dp_list[0][0] = np.array([list_obj[0]])
+
+    # pour chaque objet de la liste
+    for l in range(1, len(list_obj)):
+        if not I_dominant:
+            dp_list[l][0], index_p_opt = arg_pareto_dominants(np.concatenate((np.array([list_obj[l]]), dp_list[l - 1][0])))
+        else:
+            dp_list[l][k] = I_dominant(np.concatenate((np.array([list_obj[l]]), dp_list[l - 1][0])), alpha_min, alpha_max)
+
+        # pour chaque taille d'objet
+        for k in range(1, size_max):
+
+            if k == l + 1:
+                break
+
+            objs = np.add(dp_list[l - 1][k - 1], list_obj[l])
+
+            if k != l: # si k == l, alors k>l-1 et la case du dessus n'est pas remplie
+                objs = np.concatenate((objs, dp_list[l - 1][k]))
+
+            if not I_dominant:
+                dp_list[l][k], index_p_opt = arg_pareto_dominants(np.array(objs))
+            else:
+                dp_list[l][k] = I_dominant(np.array(objs), alpha_min, alpha_max)
+
+    return dp_list[len(list_obj)-1][size_max-1], dp_obj[len(list_obj)-1][size_max-1]
 
 
 def minimax_value(l, alpha_min, alpha_max):
@@ -194,9 +238,47 @@ def minimax_dynamic_programming(l, k, alpha_min = 0, alpha_max = 1):
 	return pareto[np.argmin(minimax_value(pareto, alpha_min, alpha_max))], list_element[np.argmax(minimax_value(pareto, alpha_min, alpha_max))]
 
 
+def I_dominant(l, alpha_min, alpha_max):
+
+    I_dominator = []
+    to_delete = []
+    new_l = copy.deepcopy(l)
+
+    while(len(new_l) != 0):
+        element = l[0]
+        i_dominant = True
+
+        # pour tous les autres éléments
+        for i in range(len(1, l)):
+            element2 = l[i]
+
+            if dominate(element, element2, alpha_min, alpha_max):
+                to_delete.append(i)
+
+            elif dominate(element2, element, alpha_min, alpha_max):
+                i_dominant = False
+                break
+
+        if(i_dominant):
+            I_dominator.append(element)
+        to_delete.append(0)
+
+        new_l = [i for (j, i) in enumerate(new_l) if (j not in to_delete)]
+
+    return I_dominator
+
+
+
+
+def fi(element, alpha):
+	return element[0] * alpha + element[1] * (1 - alpha)
+
+def dominate(e1, e2, alpha_min, alpha_max):
+	return fi(e1, alpha_min) <= fi(e2, alpha_min) and fi(e1, alpha_max) <= fi(e2, alpha_max) and (fi(e1, alpha_min) < fi(e2, alpha_min) or fi(e1, alpha_max) < fi(e2, alpha_max))
+
+
 class Element:
 
 	def __init__(self, sum = 0, element = []):
 		self.sum = sum
 		self.elements = element
-
