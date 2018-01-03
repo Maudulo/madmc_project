@@ -19,29 +19,32 @@ from MADMC_project import *
 
 # plot_pareto_compare_functions(naive_pareto_dominants, pareto_dominants, nmin = 20, nmax = 500, step = 25, n = 50)
 
-l = gaussian_vector_generator(10, 10)
-k = 5
+l = gaussian_vector_generator(6, 10)
+k = 4
 print("\nliste : \n", l)
 
-dp = dynamic_programming_2(l, k, I_dominance = False)
-# print("nombre d'éléments dans chaque case du tableau de prog dyn ",[[len(x) if x else 0 for x in y] for y in dp])
-print("\nil y a ", len(dp), " solutions")
+dp1 = dynamic_programming_2(l, k, I_dominance = False)
+# print("nombre d'éléments dans chaque case du tableau de prog dyn ",[[len(x) if x else 0 for x in y] for y in dp1])
+print("\nil y a ", len(dp1), " solutions")
 i = 0
-for x in dp:
+for x in dp1:
 	i+=1
 	print("\nsolution : ", i)
 	print("p opt de taille ", k," ", x.sum)
 	print("somme composée de ", x.elements)
 
-dp = dynamic_programming_2(l, k, I_dominance = True)
-# print("nombre d'éléments dans chaque case du tableau de prog dyn ",[[len(x) if x else 0 for x in y] for y in dp])
-print("\nil y a ", len(dp), " solutions")
+dp2 = dynamic_programming_2(l, k, I_dominance = True)
+# print("nombre d'éléments dans chaque case du tableau de prog dyn ",[[len(x) if x else 0 for x in y] for y in dp2])
+print("\nil y a ", len(dp2), " solutions")
 i = 0
-for x in dp:
+for x in dp2:
 	i+=1
 	print("\nsolution : ", i)
 	print("p opt de taille ", k," ", x.sum)
 	print("somme composée de ", x.elements)
+
+minmax = minimax_value_2(dp1)
+print("minimax avec pareto : ", minmax.sum, " composé de : " , minmax.elements)
 
 
 
