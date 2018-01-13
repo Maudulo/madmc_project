@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from MADMC_project import *
 
-def test_pareto_functions(func, nmin = 200, nmax = 10000, step = 200, m = 1000, n = 50):
+def test_pareto_functions(func, nmin = 200, nmax = 10000, step = 200, m = 1000, n = 50, proper = False):
 	"""
 	This function returns a list of the average time taken by the function func
 	@params : func : the function to test
@@ -21,10 +21,15 @@ def test_pareto_functions(func, nmin = 200, nmax = 10000, step = 200, m = 1000, 
 		for j in range(n):
 
 			l = gaussian_vector_generator(i, m)
-
-			a = time.time()
-			pareto_dominants = func(l)
-			time_measure[index_time_measure] += time.time() - a
+			proper_l = build_vector(l)
+			if proper:
+				a = time.time()
+				pareto_dominants = func(proper_l)
+				time_measure[index_time_measure] += time.time() - a
+			else:
+				a = time.time()
+				pareto_dominants = func(l)
+				time_measure[index_time_measure] += time.time() - a
 
 		time_measure[index_time_measure] /= n
 		index_time_measure += 1
@@ -32,7 +37,7 @@ def test_pareto_functions(func, nmin = 200, nmax = 10000, step = 200, m = 1000, 
 	print("-------------------------------------")
 	return time_measure
 
-def plot_pareto_functions(func, nmin = 200, nmax = 10000, step = 200, n = 50):
+def plot_pareto_functions(func, nmin = 200, nmax = 10000, step = 200, n = 50, m = 1000, proper = False):
 	"""
 	This function displays a graph representing the time depending of the number of value into a list
 	@params : func : the function to test
@@ -42,15 +47,15 @@ def plot_pareto_functions(func, nmin = 200, nmax = 10000, step = 200, n = 50):
 			  n : the number of tests during an iteration
 	"""
 	x = np.arange(nmin, nmax, step);
-	y = test_pareto_functions(func, nmin, nmax, step, n)
+	y = test_pareto_functions(func, nmin, nmax, step, n, m, proper = proper)
 	plt.plot(x, y)
 
-def plot_pareto_compare_functions(func1, func2, nmin = 200, nmax = 10000, step = 200, m = 1000, n = 50):
-	plot_pareto_functions(func1, nmin = nmin, nmax = nmax, step = step, m = m, n = n)
-	plot_pareto_functions(func2, nmin = nmin, nmax = nmax, step = step, m = m, n = n)
+def plot_pareto_compare_functions(func1, func2, nmin = 200, nmax = 10000, step = 200, m = 1000, n = 50, proper1 = False, proper2 = False):
+	plot_pareto_functions(func1, nmin = nmin, nmax = nmax, step = step, m = m, n = n, proper = proper1)
+	plot_pareto_functions(func2, nmin = nmin, nmax = nmax, step = step, m = m, n = n, proper = proper2)
 	plt.show()
 	
-def test_all_pareto_functions(func_list, nmin = 200, nmax = 10000, step = 200, m = 1000, n = 100):
+def test_all_pareto_functions(func_list, nmin = 200, nmax = 10000, step = 200, m = 1000, n = 100, proper = [False,False]):
 	"""
 	This function displays a graph representing the time depending of the number of value into a list
 	@params : func_list : a list of functions to test
@@ -72,9 +77,15 @@ def test_all_pareto_functions(func_list, nmin = 200, nmax = 10000, step = 200, m
 			l = gaussian_vector_generator(i, m)
 
 			for f in range(func_nb):
-				a = time.time()
-				pareto_dominants = func_list[f](l)
-				time_measure[f,index_time_measure] += time.time() - a
+				if proper[f] == True:
+					l = build_vector(l)
+					a = time.time()
+					pareto_dominants = func_list[f](l)
+					time_measure[f,index_time_measure] += time.time() - a
+				else:
+					a = time.time()
+					pareto_dominants = func_list[f](l)
+					time_measure[f,index_time_measure] += time.time() - a
 
 		time_measure[f] /= n
 		index_time_measure += 1

@@ -1,10 +1,13 @@
+import matplotlib.pyplot as plt
+import numpy as np
+
 from test_pareto_func import *
 from MADMC_project import *
-import numpy as np
-import matplotlib.pyplot as plt
 
+np.set_printoptions(formatter={'float': '{: 0.2f}'.format})
 
 def printAllArray(arr):
+	print("\nTableau de programmation dynamique :\n")
 	for line in arr:
 		for k in line:
 			print("[", end="")
@@ -16,62 +19,53 @@ def printAllArray(arr):
 			print("], ",end="")
 		print()
 
-np.set_printoptions(formatter={'float': '{: 0.2f}'.format})
-# vector_generated = gaussian_vector_generator(10, 50)
 
-# print("valeurs générées : ", vector_generated)
-# # l = naive_pareto_dominants(vector_generated)
-# # print("p-dominants fonction 1 : ", l)
-# # l = naive_pareto_dominants_2(vector_generated)
-# # print("p-dominants fonction 1.2 : ", l)
-# l2 = pareto_dominants(vector_generated)
-# print("p-dominants fonction 2 : ", l2)
-# elements = [Element(x,[x]) for x in vector_generated]
-# l2 = pareto_dominants_2(elements)
-# print("p-dominants fonction 2 avec elements : ", [x.elements for x in l2])
+def test_pareto_functions(n = 10, m = 50):
+	vector_generated = gaussian_vector_generator(n, m)
+	proper_vector = build_vector(vector_generated)
+	print("valeurs générées : ", vector_generated)
 
+	start = time.time()
+	l = naive_pareto_dominants(vector_generated)
+	end = time.time() - start
+	print("pareto_dominants version naive 1 : temps d'éxcution - ",end, " solution: ", l)
 
-# plot_pareto_compare_functions(naive_pareto_dominants, pareto_dominants, nmin = 20, nmax = 500, step = 25, n = 50)
+	start = time.time()
+	l = naive_pareto_dominants_2(vector_generated)
+	end = time.time() - start
+	print("pareto_dominants version naive 2 : temps d'éxcution - ",end, " solution: ", l)
 
-# l = gaussian_vector_generator(5, 10)
-# k = 3
-# print("\nliste : \n", l)
-
-# dp1 = dynamic_programming_2(l, k, I_dominance = False)
-# # print("nombre d'éléments dans chaque case du tableau de prog dyn ",[[len(x) if x else 0 for x in y] for y in dp1])
-# print("\nil y a ", len(dp1), " solutions")
-
-# for i,x in enumerate(dp1):
-# 	print("\nsolution : ", i)
-# 	print("p opt de taille ", k," ", x.sum)
-# 	print("somme composée de ", x.elements)
-
-# printAllArray(dynamic_programming_2(l, k, I_dominance = True, display_all_array = True))
-# dp2 = dynamic_programming_2(l, k, I_dominance = True)
-# #print("nombre d'éléments dans chaque case du tableau de prog dyn ",[[len(x) if x else 0 for x in y] for y in dp2])
-# print("\nil y a ", len(dp2), " solutions")
-# for i,x in enumerate(dp2):
-# 	print("\nsolution : ", i)
-# 	print("p opt de taille ", k," ", x.sum)
-# 	print("somme composée de ", x.elements)
+	start = time.time()
+	l2 = pareto_dominants(proper_vector)
+	end = time.time() - start
+	print("pareto_dominants fonction 2 avec elements : temps d'éxcution - ",end, " solution: ", [x.elements for x in l2])
 
 
-# # minmax = minimax_value_2(dp1)
-# # print("minimax avec pareto : ", minmax.sum, " composé de : " , minmax.elements)
-# minmax = minimax_value_2(dp2)
-# print("minimax avec I dominance : ", minmax.sum, " composé de : " , minmax.elements)
+def compare_and_plot_pareto_functions(nmin = 20, nmax = 500, step = 25, n = 50):
+	plot_pareto_compare_functions(naive_pareto_dominants, pareto_dominants, nmin = nmin, nmax = nmax, step = step, n = n, proper2 = True)
+
+
+def compute_and_display_solution_of_dynamic_programming(n=5,m=10, k=3, I_dominance = False, display_dynamic_array = False):
+	l = gaussian_vector_generator(n, m)
+	print("\nwith I_dominance = ",I_dominance,"\nliste : \n", l)
+
+	dp = dynamic_programming(l, k, I_dominance = I_dominance)
+
+	if display_dynamic_array:
+		printAllArray(dynamic_programming(l, k, I_dominance = True, display_all_array = True))
+
+	print("\nil y a ", len(dp), " solutions")
+
+	for i,x in enumerate(dp):
+		print("\nsolution : ", i+1)
+		print("solution pareto optimale de taille ", k," avec pour somme totale ", x.sum)
+		print("solution composée de :\n", x.elements)
+
+	minmax = minimax_value(dp)
+	print("\nminimax de la solution : ", minmax.sum, " composé de : " , minmax.elements)
 
 
 
-#TODO : MINMAX parmi les solutions opt
-
-
-# alpha_min = 0.1
-# alpha_max = 0.2
-# print("meilleur minimax avec alpha_min = ", alpha_min, " alpha_max = ", alpha_max, "\n", minimax_dynamic_programming(l, k, alpha_min = 0, alpha_max = 1))
-
-# test_all_pareto_functions([naive_pareto_dominants, pareto_dominants])
-# 
 def tests(n = 50):
 	t1,t2 = 0,[0 for _ in range(20)]
 	for i in range(n):
@@ -79,12 +73,12 @@ def tests(n = 50):
 		l = gaussian_vector_generator(50, 1000)
 		k = 10
 		start = time.time()
-		dp1 = dynamic_programming_2(l, k, I_dominance = False)
+		dp1 = dynamic_programming(l, k, I_dominance = False)
 		t1 += time.time() - start
 
 		for i,a in enumerate(np.arange(0.025,0.525,0.025)):
 			start = time.time()
-			dp2 = dynamic_programming_2(l, k, I_dominance = True, alpha_min=0.5-a, alpha_max= 0.5+a)
+			dp2 = dynamic_programming(l, k, I_dominance = True, alpha_min=0.5-a, alpha_max= 0.5+a)
 			t2[i] += time.time() - start
 
 	return t1/n,np.array(t2)/n
@@ -101,4 +95,9 @@ def display_result_tests(results):
 	print(t1)
 	print(t2)
 
-display_result_tests(tests(50))
+
+# test_pareto_functions(n=10,m=50)
+# compare_and_plot_pareto_functions(nmin = 20, nmax = 500, step = 25, n = 50)
+# test_all_pareto_functions([naive_pareto_dominants, pareto_dominants], proper = [False,True])
+# compute_and_display_solution_of_dynamic_programming(n=5,m=10,k=3,I_dominance=False,display_dynamic_array=True)
+# display_result_tests(tests(50))
