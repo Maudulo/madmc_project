@@ -106,14 +106,14 @@ def display_result_tests(results):
 #########################################################################################################
 # compare la vitesse d'exécution des différentes fonctions trouvant les pareto non dominés (naive 1 et celle avec le tri)
 #########################################################################################################
-# compare_and_plot_pareto_functions(nmin = 20, nmax = 500, step = 25, n = 50)
+# compare_and_plot_pareto_functions(nmin = 20, nmax = 600, step = 25, n = 50)
  
 
 #########################################################################################################
 # compare la vitesse d'exécution des différentes fonctions trouvant les pareto non dominés 
 # (les fonctions à tester sont données dans le premier paramètre sous forme de liste)
 #########################################################################################################
-# test_all_pareto_functions([naive_pareto_dominants, pareto_dominants], nmin = 200, nmax = 1000, step = 200, m = 1000, n = 100, proper = [False,True])
+# test_all_pareto_functions([naive_pareto_dominants, pareto_dominants], nmin = 200, nmax = 10000, step = 200, m = 1000, n = 100, proper = [False,True])
 
 
 #########################################################################################################

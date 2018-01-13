@@ -1,4 +1,6 @@
 Toutes ces fonctions sont présentes dans le fichier main.py
+Décommentez la ligne que vous voulez lancer puis dans un terminal:
+$ python main.py
 
 #########################################################################################################
 # créer n vecteurs avec tirage gaussien d'espérance m puis récupère les pareto non dominés selon 3 fonctions
