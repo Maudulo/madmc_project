@@ -38,7 +38,7 @@ def test_pareto_functions(n = 10, m = 50):
 	start = time.time()
 	l2 = pareto_dominants(proper_vector)
 	end = time.time() - start
-	print("pareto_dominants fonction 2 avec elements : temps d'éxcution - ",end, " solution: ", [x.elements for x in l2])
+	print("pareto_dominants version avec tri : temps d'éxcution - ",end, " solution: ", [x.elements for x in l2])
 
 
 def compare_and_plot_pareto_functions(nmin = 20, nmax = 500, step = 25, n = 50):
@@ -66,11 +66,11 @@ def compute_and_display_solution_of_dynamic_programming(n=5,m=10, k=3, I_dominan
 
 
 
-def tests(n = 50):
+def tests(tests = 50, n = 50, m=1000, k=10):
 	t1,t2 = 0,[0 for _ in range(20)]
-	for i in range(n):
+	for i in range(tests):
 		print("test :",i)
-		l = gaussian_vector_generator(50, 1000)
+		l = gaussian_vector_generator(n, m)
 		k = 10
 		start = time.time()
 		dp1 = dynamic_programming(l, k, I_dominance = False)
@@ -81,7 +81,7 @@ def tests(n = 50):
 			dp2 = dynamic_programming(l, k, I_dominance = True, alpha_min=0.5-a, alpha_max= 0.5+a)
 			t2[i] += time.time() - start
 
-	return t1/n,np.array(t2)/n
+	return t1/tests,np.array(t2)/tests
 
 
 def display_result_tests(results):
@@ -96,8 +96,38 @@ def display_result_tests(results):
 	print(t2)
 
 
+#########################################################################################################
+# créer n vecteurs avec tirage gaussien d'espérance m puis récupère les pareto non dominés selon 3 fonctions
+# deux naives et une optimisée en commencant par un tri
+#########################################################################################################
 # test_pareto_functions(n=10,m=50)
+
+
+#########################################################################################################
+# compare la vitesse d'exécution des différentes fonctions trouvant les pareto non dominés (naive 1 et celle avec le tri)
+#########################################################################################################
 # compare_and_plot_pareto_functions(nmin = 20, nmax = 500, step = 25, n = 50)
-# test_all_pareto_functions([naive_pareto_dominants, pareto_dominants], proper = [False,True])
+ 
+
+#########################################################################################################
+# compare la vitesse d'exécution des différentes fonctions trouvant les pareto non dominés (les fonctions sont données dans la fonction)
+#########################################################################################################
+# test_all_pareto_functions([naive_pareto_dominants, pareto_dominants], nmin = 200, nmax = 1000, step = 200, m = 1000, n = 100, proper = [False,True])
+
+
+#########################################################################################################
+# calcule et affiche les solutions de la programmation dynamique pour n vecteurs de génération gaussienne
+# d'espérance m pour trouver les ensembles pareto non dominés de taille k (1<k<=n)
+# soit par pareto soit par l'I_dominance (I_dominance = True)
+# on peut aussi afficher la tableau complet de programmation dynamique (display_dynamic_array = True)
+#########################################################################################################
 # compute_and_display_solution_of_dynamic_programming(n=5,m=10,k=3,I_dominance=False,display_dynamic_array=True)
-# display_result_tests(tests(50))
+
+
+#########################################################################################################
+# compare le temps d'exécution pour trouver les pareto non dominés avec la technique Pareto ou I_dominance
+# avec tests le nombre de tests, n le nombre de vecteurs par tests, m l'espérance de génération gaussienne par vecteur
+# et k le cardinal de l'ensemble de pareto non dominés à trouver
+#########################################################################################################
+# display_result_tests(tests(tests=50,n=50,m=1000,k=10))
+ 
